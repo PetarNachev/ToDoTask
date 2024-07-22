@@ -11,12 +11,12 @@ class TodocdkStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const table = new dynamodb.Table(this, 'ToDoTable', {
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      tableName: 'ToDoTable',
+    });
+    
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'TodocdkQueue', {
-    //   visibilityTimeout: Duration.seconds(300)
-    // });
   }
 }
 
