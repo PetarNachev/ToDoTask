@@ -62,6 +62,18 @@ const TodoList = () => {
         }
     };
 
+    const handleDeleteTodo = async (id) => {
+        const confirmed = window.confirm("Are you sure you want to delete this todo?");
+        if (!confirmed) {
+            return;
+        }
+        try {
+            await deleteTodo(id);
+            setTodos(todos.filter(todo => todo.id !== id));
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+        }
+    };
 
     return (
         <div className="container">
@@ -99,7 +111,7 @@ const TodoList = () => {
                             </div>
                             <div className="todo-buttons">
                                 <button onClick={() => handleOpenEditDialog(todo)}>Edit</button>
-                                <button >Delete</button>
+                                <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
                             </div>
                         </li>
                     ))}
