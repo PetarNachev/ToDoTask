@@ -5,6 +5,7 @@ const TodoList = () => {
     const [todos, setTodos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [newTodo, setNewTodo] = useState({ title: '', description: '' });
+    const [editingTodo, setEditingTodo] = useState(null);
 
     const loadTodos = async () => {
         setLoading(true);
@@ -36,6 +37,28 @@ const TodoList = () => {
             console.error('Error adding todo:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleOpenEditDialog = (todo) => {
+        setEditingTodo(todo);
+    };
+
+    const handleCloseEditDialog = () => {
+        setEditingTodo(null);
+    };
+
+    const handleUpdateTodo = async () => {
+        if (!editingTodo.title.trim() || !editingTodo.description.trim()) {
+            alert("Both title and description are required.");
+            return;
+        }
+        try {
+            const updatedTodo = await updateTodo(editingTodo.id, editingTodo);
+            setTodos(todos.map(todo => (todo.id === editingTodo.id ? updatedTodo : todo)));
+            handleCloseEditDialog();
+        } catch (error) {
+            console.error('Error updating todo:', error);
         }
     };
 
@@ -75,12 +98,32 @@ const TodoList = () => {
                                 <strong>Last Updated:</strong> {todo.lastUpdated ? new Date(todo.lastUpdated).toLocaleString() : 'N/A'}
                             </div>
                             <div className="todo-buttons">
-                                <button >Edit</button>
+                                <button onClick={() => handleOpenEditDialog(todo)}>Edit</button>
                                 <button >Delete</button>
                             </div>
                         </li>
                     ))}
                 </ul>
+            )}
+
+            {editingTodo && (
+                <dialog open className="dialog">
+                    <h2>Edit Todo</h2>
+                    <input
+                        type="text"
+                        placeholder="Title"
+                        value={editingTodo.title}
+                        onChange={(e) => setEditingTodo({ ...editingTodo, title: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Description"
+                        value={editingTodo.description}
+                        onChange={(e) => setEditingTodo({ ...editingTodo, description: e.target.value })}
+                    />
+                    <button onClick={handleUpdateTodo}>Update</button>
+                    <button onClick={handleCloseEditDialog}>Cancel</button>
+                </dialog>
             )}
         </div>
     );
