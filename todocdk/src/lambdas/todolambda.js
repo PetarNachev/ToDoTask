@@ -50,3 +50,35 @@ exports.createTodo = async (event) => {
 
     }
 };
+
+exports.listTodos = async () => {
+    const params = {
+        TableName: 'ToDoTable'
+    };
+
+    const command = new ScanCommand(params);
+
+    try {
+        const result = await client.send(command);
+        const todos = result.Items ? result.Items.map(item => unmarshall(item)) : [];
+
+        todos.sort((a, b) => {
+            if (!a.lastUpdated) return 1;
+            if (!b.lastUpdated) return -1;
+            return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+        });
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(todos),
+        };
+
+    } catch (error) {
+        console.error(error);
+
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Error listing todos" })
+        };
+    }
+};

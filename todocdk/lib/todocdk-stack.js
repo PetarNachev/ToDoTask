@@ -34,10 +34,10 @@ class TodocdkStack extends Stack {
       },
     });
 
-
-    table.grantReadWriteData(createTodoFunction);
+    
+    table.grantWriteData(createTodoFunction);
     table.grantReadData(listTodosFunction);
-
+  
 
     const todoApi = new apigateway.RestApi(this, 'TodoApi', {
       restApiName: 'Todo Service',
