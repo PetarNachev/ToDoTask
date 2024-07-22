@@ -23,3 +23,23 @@ export const createTodo = async (todo) => {
     }
 };
 
+export const updateTodo = async (id, todo) => {
+    try {
+        const response = await axios.put(`${API_ENDPOINT}/todos/${id}`, todo);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating todo:', error);
+        throw error;
+    }
+};
+
+export const deleteTodo = async (id) => {
+    try {
+        const response = await axios.delete(`${API_ENDPOINT}/todos/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting todo:', error);
+        throw error;
+    }
+};
+
