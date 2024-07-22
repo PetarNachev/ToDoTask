@@ -34,9 +34,19 @@ class TodocdkStack extends Stack {
       },
     });
 
-    
+    const updateTodoFunction = new lambda.Function(this, 'UpdateTodoFunction', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'todolambda.updateTodo',
+      code: lambda.Code.fromAsset('src/lambdas'),
+      environment: {
+        TABLE_NAME: table.tableName,
+      },
+    });
+
+
     table.grantWriteData(createTodoFunction);
     table.grantReadData(listTodosFunction);
+    table.grantReadWriteData(updateTodoFunction);
   
 
     const todoApi = new apigateway.RestApi(this, 'TodoApi', {
@@ -51,6 +61,10 @@ class TodocdkStack extends Stack {
     const todos = todoApi.root.addResource('todos');
     todos.addMethod('POST', new apigateway.LambdaIntegration(createTodoFunction));
     todos.addMethod('GET', new apigateway.LambdaIntegration(listTodosFunction));
+
+    const todo = todos.addResource('{id}');
+    todo.addMethod('PUT', new apigateway.LambdaIntegration(updateTodoFunction));
+
 
 
 
