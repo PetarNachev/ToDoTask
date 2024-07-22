@@ -11,7 +11,6 @@ function generateId() {
 
 const currentTimestamp = new Date().toISOString();
 
-
 exports.createTodo = async (event) => {
 
     const id = generateId();
@@ -79,6 +78,66 @@ exports.listTodos = async () => {
         return {
             statusCode: 500,
             body: JSON.stringify({ message: "Error listing todos" })
+        };
+    }
+};
+
+
+exports.updateTodo = async (event) => {
+    const { id } = event.pathParameters;
+    const body = JSON.parse(event.body);
+    const timestamp = new Date().toISOString();
+
+    const updateExpressionParts = ['#lastUpdated = :lastUpdated'];
+    const expressionAttributeNames = {
+        '#lastUpdated': 'lastUpdated'
+    };
+    const expressionAttributeValues = {
+        ':lastUpdated': timestamp
+    };
+
+    if (body.title) {
+        updateExpressionParts.push('#title = :title');
+        expressionAttributeNames['#title'] = 'title';
+        expressionAttributeValues[':title'] = body.title;
+    }
+
+    if (body.description) {
+        updateExpressionParts.push('#description = :description');
+        expressionAttributeNames['#description'] = 'description';
+        expressionAttributeValues[':description'] = body.description;
+    }
+
+    if (updateExpressionParts.length === 1) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: 'No fields to update' }),
+        };
+    }
+
+    const params = {
+        TableName: process.env.TABLE_NAME || 'ToDoTable',
+        Key: marshall({ id }),
+        UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: marshall(expressionAttributeValues, { removeUndefinedValues: true }),
+        ReturnValues: 'ALL_NEW',
+    };
+
+    try {
+        const command = new UpdateItemCommand(params);
+        const result = await client.send(command);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(unmarshall(result.Attributes)),
+        };
+    } catch (error) {
+        console.error('Error updating todo:', error);
+
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Error updating todo", error: error.message }),
         };
     }
 };
