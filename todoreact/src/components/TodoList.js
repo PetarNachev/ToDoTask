@@ -4,6 +4,7 @@ import { fetchTodos, createTodo, updateTodo, deleteTodo } from '../api/todoServi
 const TodoList = () => {
     const [todos, setTodos] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [newTodo, setNewTodo] = useState({ title: '', description: '' });
 
     const loadTodos = async () => {
         setLoading(true);
@@ -21,6 +22,24 @@ const TodoList = () => {
         loadTodos();
     }, []);
 
+    const handleAddTodo = async () => {
+        if (!newTodo.title.trim() || !newTodo.description.trim()) {
+            alert("Both title and description are required.");
+            return;
+        }
+        setLoading(true);
+        try {
+            await createTodo(newTodo);
+            await loadTodos();
+            setNewTodo({ title: '', description: '' });
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     return (
         <div className="container">
             <h1>Todo List</h1>
@@ -28,12 +47,16 @@ const TodoList = () => {
                 <input
                     type="text"
                     placeholder="Title"
+                    value={newTodo.title}
+                    onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
                 />
                 <input
                     type="text"
                     placeholder="Description"
+                    value={newTodo.description}
+                    onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
                 />
-                <button>Add Todo</button>
+                <button className="add-todo-button" onClick={handleAddTodo}>Add Todo</button>
             </div>
 
             {loading ? (
