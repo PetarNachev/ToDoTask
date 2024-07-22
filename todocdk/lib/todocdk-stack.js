@@ -43,10 +43,20 @@ class TodocdkStack extends Stack {
       },
     });
 
+    const deleteTodoFunction = new lambda.Function(this, 'DeleteTodoFunction', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'todolambda.deleteTodo',
+      code: lambda.Code.fromAsset('src/lambdas'),
+      environment: {
+        TABLE_NAME: table.tableName,
+      },
+    });
+
 
     table.grantWriteData(createTodoFunction);
     table.grantReadData(listTodosFunction);
     table.grantReadWriteData(updateTodoFunction);
+    table.grantReadWriteData(deleteTodoFunction);
   
 
     const todoApi = new apigateway.RestApi(this, 'TodoApi', {
@@ -64,11 +74,7 @@ class TodocdkStack extends Stack {
 
     const todo = todos.addResource('{id}');
     todo.addMethod('PUT', new apigateway.LambdaIntegration(updateTodoFunction));
-
-
-
-
-
+    todo.addMethod('DELETE', new apigateway.LambdaIntegration(deleteTodoFunction));
 
   }
 }
