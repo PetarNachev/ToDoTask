@@ -1,4 +1,4 @@
-const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, ScanCommand, UpdateItemCommand, DeleteItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const crypto = require('crypto');
 
@@ -141,3 +141,31 @@ exports.updateTodo = async (event) => {
         };
     }
 };
+
+exports.deleteTodo = async (event) => {
+    const { id } = event.pathParameters;
+  
+    const params = {
+      TableName: process.env.TABLE_NAME || 'ToDoTable',
+      Key: marshall({ id })
+    };
+  
+    try {
+      const command = new DeleteItemCommand(params);
+      const result = await client.send(command);
+  
+      return {
+        statusCode: 200,
+        body: 'To do deleted'
+      };
+  
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+  
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ message: "Error deleting todo", error: error.message })
+      };
+    }
+  
+  };

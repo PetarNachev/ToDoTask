@@ -1,5 +1,7 @@
 const { Stack, Duration } = require('aws-cdk-lib');
-// const sqs = require('aws-cdk-lib/aws-sqs');
+const lambda = require('aws-cdk-lib/aws-lambda');
+const dynamodb = require('aws-cdk-lib/aws-dynamodb')
+const apigateway = require('aws-cdk-lib/aws-apigateway');
 
 class TodocdkStack extends Stack {
   /**
